@@ -26,7 +26,7 @@ btnDiseases = KeyboardButton('О болезнях')
 btnFeeding = KeyboardButton('О кормлении')
 btnMaintenance = KeyboardButton('О содержании')
 btnVac = KeyboardButton('О вакцинации')
-btnTravel = KeyboardButton('О путешествии')
+btnTravel = KeyboardButton('О путешествии с животным')
 
 infoMenu = ReplyKeyboardMarkup(resize_keyboard=True).row(btnDiseases, btnFeeding, btnMaintenance).\
     add(btnVac, btnTravel).add(btnMain)

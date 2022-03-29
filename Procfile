@@ -1,0 +1,1 @@
+worker: python vet_bot.py

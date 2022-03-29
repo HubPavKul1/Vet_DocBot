@@ -4,7 +4,8 @@ from create_bot import bot, dp
 from keyboards.default import menu_kb as nav
 from data import config
 
-admins = config.ADMINS
+# admins = config.ADMINS
+admins = [123]
 
 
 # @dp.message_handler(commands=['start'])
@@ -12,7 +13,7 @@ async def start_working(message: types.Message):
     if str(message.from_user.id) not in admins:
         await bot.send_message(message.from_user.id,
                                'Здравствуйте, {0.first_name}!\n'
-                               'Меня зовут Павел.'
+                               'Меня зовут Павел.\n'
                                'Я работаю ветеринарным врачом в г.Иваново более 20-лет.\n'
                                'Надеюсь, я смогу быть Вам полезен\n'
                                'Выберите необходимую команду в меню'.format(message.from_user),
