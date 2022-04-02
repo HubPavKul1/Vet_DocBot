@@ -7,9 +7,10 @@ btnMain = KeyboardButton('Главное меню')
 
 btnDrags = KeyboardButton('Справочник препаратов')
 btnCure = KeyboardButton('Схемы лечения')
-# btnContact = KeyboardButton('Позвонить врачу')
+btnInfo = KeyboardButton('Инфо для владельцев животных')
+btnServices = KeyboardButton('Вет услуги')
 
-adminMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrags).add(btnCure)
+adminMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrags).add(btnCure).add(btnInfo).add(btnServices)
 
 
 # --- Main menu for clients ---
@@ -38,3 +39,26 @@ btnOper = KeyboardButton('Операции')
 btnTreatment = KeyboardButton('Лечение')
 
 vetServices = ReplyKeyboardMarkup(resize_keyboard=True).row(btnVaccin, btnOper, btnTreatment).add(btnMain)
+
+# --- Feeding menu ---
+
+btnFeedDogs = KeyboardButton('Кормление собак')
+btnFeedCats = KeyboardButton('Кормление кошек')
+
+FeedingMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnFeedDogs).add(btnFeedCats).add(btnInfo).add(btnMain)
+
+# --- Disease menu ---
+
+btnRabies = KeyboardButton('Бешенство')
+btnLeptospirosis = KeyboardButton('Лептоспироз')
+btnMicrosporia = KeyboardButton('Стригущий лишай')
+btnToxoplasmosis = KeyboardButton('Токсоплазмоз')
+btnBabesiosis = KeyboardButton('Бабезиоз собак')
+btnHelminthosis = KeyboardButton('Гельминтозы')
+btnCatsDisease = KeyboardButton('Вирусные инфекции кошек')
+btnDogsDisease = KeyboardButton('Вирусные инфекции собак')
+
+DiseaseMenu = ReplyKeyboardMarkup(resize_keyboard=True).row(btnRabies, btnLeptospirosis).\
+    add(btnMicrosporia, btnToxoplasmosis).add(btnBabesiosis, btnHelminthosis).add(btnCatsDisease, btnDogsDisease).\
+    add(btnMain, btnInfo)
+
