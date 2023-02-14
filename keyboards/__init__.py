@@ -1,2 +1,2 @@
-from . import default
-from . import inline
+from keyboards import default
+from keyboards import inline

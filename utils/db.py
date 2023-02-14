@@ -3,18 +3,333 @@ from psycopg2 import Error
 from data.config import DATABASE_URL
 
 
-try:
-    connection = ps.connect(DATABASE_URL, sslmode='require')
-    cur = connection.cursor()
-    print('Подключение к БД')
-    print("Информация о сервере PostgreSQL")
-    print(connection.get_dsn_parameters(), "\n")
-except (Exception, Error) as error:
-    print("Ошибка при работе с PostgreSQL", error)
-finally:
-    if connection:
-        cur.close()
-        connection.close()
-        print("Соединение с PostgreSQL закрыто")
+# try:
+#     connection = ps.connect(DATABASE_URL, sslmode='require')
+#     cur = connection.cursor()
+#     print('Подключение к БД')
+#     print("Информация о сервере PostgreSQL")
+#     print(connection.get_dsn_parameters(), "\n")
+# except (Exception, Error) as error:
+#     print("Ошибка при работе с PostgreSQL", error)
+# finally:
+#     if connection:
+#         cur.close()
+#         connection.close()
+#         print("Соединение с PostgreSQL закрыто")
 
 
+def user_exists(user_id):
+    """Check user exists in db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT user_id FROM users WHERE user_id = %s """, (user_id,))
+            result = cursor.fetchone()
+            return bool(result)
+
+
+def get_user_id(user_id):
+    """Get user from db by user_id"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id FROM users WHERE user_id = %s """, (user_id,))
+            result = cursor.fetchone()
+            return result[0]
+
+
+def add_user(user_id, first_name, last_name):
+    """Add user to db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO users (user_id, first_name, last_name) VALUES (%s, %s, %s) """,
+                           (user_id, first_name, last_name))
+            return conn.commit()
+
+
+def get_streets(street):
+    """Get streets from table streets"""
+    street = '%{}%'.format(street).title()
+
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute("""SELECT id, name FROM streets WHERE name LIKE %s""", (street,))
+            result = cursor.fetchall()
+            return result
+
+
+def get_street_id(street):
+    """Get street id from db"""
+    street = '%{}%'.format(street).title()
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id FROM streets WHERE name LIKE %s """, (street,))
+            result = cursor.fetchone()
+            return result[0]
+
+
+def get_species_id(species):
+    """Get species id from db"""
+    species = '%{}%'.format(species).lower()
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id FROM species WHERE name LIKE %s """, (species,))
+            result = cursor.fetchone()[0]
+            return result
+
+
+def get_breed_id(species_id, breed):
+    """Get breed id from db"""
+    breed = '{}%'.format(breed).capitalize()
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id 
+            FROM breeds 
+            WHERE species_id = %s 
+            AND name LIKE %s """, (species_id, breed))
+            result = cursor.fetchone()[0]
+            return result
+
+
+def get_service_id(service):
+    """Get service id from db"""
+    service = '%{}%'.format(service)
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id FROM vet_service WHERE service LIKE %s """, (service,))
+            result = cursor.fetchone()
+            return result[0]
+
+
+def show_users() -> str:
+    """Get user id, first_name, last_name from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id, first_name, last_name FROM users ORDER BY id DESC """)
+            result = cursor.fetchall()
+            users = ''
+            for item in result:
+                users += f'{item[1]} {item[2]}: {item[0]}' + '\n'
+            return users
+
+
+# --- Регистрация заказа ---
+# --- Регистрация владельца ---
+async def add_owner(first_name, last_name):
+    """Add owner to db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO owners (first_name, last_name) VALUES (%s, %s) """,
+                           (first_name, last_name))
+            return conn.commit()
+
+
+def show_streets() -> str:
+    """Get street id, name from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id, name FROM streets """)
+            result = cursor.fetchall()
+            streets = ''
+            for item in result:
+                streets += f'{item[1]}: {item[0]}' + '\n'
+            return streets
+
+
+# --- Регистрация адреса ---
+async def add_address(owner_id, street_id, house, flat):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO address (
+                            owner_id,
+                            street_id,
+                            house,
+                            flat
+                            )
+                            VALUES (
+                            %s, %s, %s, %s
+                            )
+                            """, (
+                owner_id,
+                street_id,
+                house,
+                flat
+            ))
+            return conn.commit()
+
+
+# --- Регистрация пациента ---
+def show_breeds(species_id):
+    """Get breed id, name from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id, name FROM breeds WHERE species_id = %s """, (species_id,))
+            result = cursor.fetchall()
+            breed_string = ''
+            for item in result:
+                breed_string += f'{item[1]}: {item[0]}' + '\n'
+            return breed_string
+
+
+async def add_patient(species_id, breed_id, sex, date_of_birth, nickname, owner_id):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO patient (
+                            species_id,
+                            breed_id,
+                            sex,
+                            date_of_birth,
+                            nickname,
+                            owner_id       
+                            )
+                            VALUES (
+                            %s, %s, %s, %s, %s, %s
+                            )
+                            """, (
+                species_id,
+                breed_id,
+                sex,
+                date_of_birth,
+                nickname,
+                owner_id
+            ))
+            return conn.commit()
+
+
+# --- Регистрация заказа
+def show_owners() -> str:
+    """Get owner id, first_name, last_name from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT id, first_name, last_name FROM owners ORDER BY id DESC """)
+            result = cursor.fetchall()
+            owners = ''
+            for item in result:
+                owners += f'{item[1]} {item[2]}: {item[0]}' + '\n'
+            return owners
+
+
+def show_patients() -> str:
+    """Show patients"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" 
+            SELECT  
+            species.name, 
+            breeds.name, 
+            patient.nickname, 
+            patient.id
+            FROM patient 
+            JOIN species ON species.id = patient.species_id
+            JOIN breeds ON breeds.id = patient.breed_id
+            ORDER BY patient.id DESC 
+            """)
+            result = cursor.fetchall()
+            patients = ''
+            for item in result:
+                patients += f'{item[0]} {item[1]} {item[2]}: {item[3]}' + '\n'
+            return patients
+
+
+async def add_order(date, owner_id, patient_id, cost):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO orders (
+                            date,
+                            owner_id,
+                            patient_id,
+                            cost
+                            )
+                            VALUES (
+                            %s, %s, %s, %s
+                            )
+                            """, (
+                date,
+                owner_id,
+                patient_id,
+                cost
+            ))
+            return conn.commit()
+
+
+# --- Добавление услуги к заказу ---
+def show_price() -> str:
+    """Get service id, name from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" SELECT service, price, id FROM vet_service """)
+            result = cursor.fetchall()
+            services = ''
+            for item in result:
+                services += f'{item[0]}; цена: {item[1]} руб.; ID: {item[2]}' + '\n'
+            return services
+
+
+async def add_service(order_id, service_id):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO order_service (
+                            order_id,
+                            service_id
+                            )
+                            VALUES (
+                            %s, %s
+                            )
+                            """, (
+                order_id,
+                service_id
+
+            ))
+            return conn.commit()
+
+
+async def add_treatment(order_id, medication):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" INSERT INTO order_treatment (
+                            order_id,
+                            medication
+                            )
+                            VALUES (
+                            %s, %s
+                            )
+                            """, (
+                order_id,
+                medication
+
+            ))
+            return conn.commit()
+
+
+# --- SHOW REGISTER ---
+def show_register() -> str:
+    """Show register"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(""" 
+            SELECT  
+            orders.date,
+            owners.last_name,
+            owners.first_name,
+            species.name,
+            breeds.name,
+            patient.date_of_birth,  
+            patient.nickname,
+            vet_service.service,
+            order_treatment.medication,
+            orders.cost
+            FROM orders 
+            JOIN owners ON owners.id = orders.owner_id
+            JOIN patient ON patient.id = orders.patient_id
+            JOIN species ON species.id = patient.species_id
+            JOIN breeds ON breeds.id = patient.breed_id
+            LEFT JOIN order_service ON orders.id = order_service.order_id
+            JOIN vet_service ON vet_service.id = order_service.service_id
+            LEFT JOIN order_treatment ON orders.id = order_treatment.order_id  
+            ORDER BY orders.date DESC     
+            """)
+            result = cursor.fetchall()
+            rows = ''
+
+            for item in result:
+                rows += f'| {item[0]} | {item[1]} | {item[2]} | {item[3]} | ' \
+                            f'{item[4]} | {item[5]} | {item[6]} | {item[7]} | {item[8]} | {item[9]} |' + '\n'
+            return rows
