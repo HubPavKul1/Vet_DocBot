@@ -4,7 +4,7 @@ from data.config import DATABASE_URL
 
 
 # try:
-#     connection = ps.connect(DATABASE_URL, sslmode='require')
+#     connection = ps.connect(DATABASE_URL)
 #     cur = connection.cursor()
 #     print('Подключение к БД')
 #     print("Информация о сервере PostgreSQL")
