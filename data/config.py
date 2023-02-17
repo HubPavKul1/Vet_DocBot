@@ -1,6 +1,9 @@
 from environs import Env
 import os
 
+from environs import Env
+import os
+
 # Теперь используем вместо библиотеки python-dotenv библиотеку environs
 env = Env()
 env.read_env()
