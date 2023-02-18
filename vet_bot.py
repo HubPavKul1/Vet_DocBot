@@ -9,7 +9,7 @@ import psycopg2 as ps
 
 
 from handlers import *
-from utils.db import create_tables
+from utils.db import create_tables, delete_tables, fill_streets, fill_breeds
 from data.config import ADMINS, URL_APP
 
 app = Flask(__name__)
@@ -42,7 +42,14 @@ other.register_handlers_other(dp)
 
 
 if __name__ == '__main__':
-    create_tables()
+    # delete_tables()
+    # print('tables deleted')
+    # create_tables()
+    # print('tables created')
+    # fill_streets()
+    # print('streets added')
+    # fill_breeds()
+    # print('breeds added')
     executor.start_polling(dp, skip_updates=True, on_shutdown=on_shutdown, on_startup=on_startup)
     # executor.start_webhook(
     #     dispatcher=dp,

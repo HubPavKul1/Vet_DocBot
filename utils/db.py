@@ -24,6 +24,13 @@ def create_tables() -> None:
             cursor.execute(create_tables_query)
 
 
+def delete_tables():
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            for table in tables:
+                cursor.execute(f"""DROP TABLE IF EXISTS {table} CASCADE""")
+
+
 def user_exists(user_id: int) -> bool:
     """Check user exists in db"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
@@ -42,7 +49,7 @@ def get_user_id(user_id: int) -> int:
             return result[0]
 
 
-def add_user(user_id: int, first_name: str, last_name: str) -> None:
+async def add_user(user_id: int, first_name: str, last_name: str) -> None:
     """Add user to db"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
@@ -61,12 +68,22 @@ def get_streets(street: str):
             return result
 
 
+def get_city_id(city: str) -> int:
+    """Get city_id from db"""
+    city = '%{}%'.format(city).title()
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(get_city_id_query, (city,))
+            result = cursor.fetchone()
+            return result[0]
+
+
 def get_street_id(street: str) -> int:
     """Get street id from db"""
     street = '%{}%'.format(street).title()
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(get_street_id, (street,))
+            cursor.execute(get_street_id_query, (street,))
             result = cursor.fetchone()
             return result[0]
 
@@ -135,6 +152,34 @@ def show_streets() -> str:
             return streets
 
 
+def add_city(name: str):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(add_city_query, (name,))
+            return conn.commit()
+
+
+def add_street(city_id: int, name: str):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(add_street_query, (city_id, name))
+            return conn.commit()
+
+
+def add_species(name: str):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(add_species_query, (name,))
+            return conn.commit()
+
+
+def add_breed(species_id: int, name: str):
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(add_breed_query, (species_id, name))
+            return conn.commit()
+
+
 # --- Регистрация адреса ---
 async def add_address(owner_id: int, street_id: int, house: str, flat: int):
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
@@ -148,7 +193,7 @@ def show_breeds(species_id: int) -> str:
     """Get breed id, name from db"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" SELECT * FROM breeds WHERE species_id = %s """, (species_id,))
+            cursor.execute(show_breeds_query, (species_id,))
             result = cursor.fetchall()
             breed_string = ''
             for item in result:
@@ -159,25 +204,7 @@ def show_breeds(species_id: int) -> str:
 async def add_patient(species_id: int, breed_id: int, sex: str, date_of_birth: str, nickname: str, owner_id: int):
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" INSERT INTO patients (
-                            species_id,
-                            breed_id,
-                            sex,
-                            date_of_birth,
-                            nickname,
-                            owner_id       
-                            )
-                            VALUES (
-                            %s, %s, %s, %s, %s, %s
-                            )
-                            """, (
-                species_id,
-                breed_id,
-                sex,
-                date_of_birth,
-                nickname,
-                owner_id
-            ))
+            cursor.execute(add_patient_query, (species_id, breed_id, sex, date_of_birth, nickname, owner_id))
             return conn.commit()
 
 
@@ -186,7 +213,7 @@ def show_owners() -> str:
     """Get owner id, first_name, last_name from db"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" SELECT id, first_name, last_name FROM owners ORDER BY id DESC """)
+            cursor.execute(show_owners_query)
             result = cursor.fetchall()
             owners = ''
             for item in result:
@@ -198,17 +225,7 @@ def show_patients() -> str:
     """Show patients"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" 
-            SELECT  
-            species.name, 
-            breeds.name, 
-            patients.nickname, 
-            patients.id
-            FROM patients 
-            JOIN species ON species.id = patients.species_id
-            JOIN breeds ON breeds.id = patients.breed_id
-            ORDER BY patients.id DESC 
-            """)
+            cursor.execute(show_patients_query)
             result = cursor.fetchall()
             patients = ''
             for item in result:
@@ -219,21 +236,7 @@ def show_patients() -> str:
 async def add_order(date: str, owner_id: int, patient_id: int, cost: int):
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" INSERT INTO orders (
-                            date,
-                            owner_id,
-                            patient_id,
-                            cost
-                            )
-                            VALUES (
-                            %s, %s, %s, %s
-                            )
-                            """, (
-                date,
-                owner_id,
-                patient_id,
-                cost
-            ))
+            cursor.execute(add_order_query, (date, owner_id, patient_id, cost))
             return conn.commit()
 
 
@@ -242,7 +245,7 @@ def show_price() -> str:
     """Get service id, name from db"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" SELECT service, price, id FROM vet_service """)
+            cursor.execute(show_price_query)
             result = cursor.fetchall()
             services = ''
             for item in result:
@@ -253,36 +256,14 @@ def show_price() -> str:
 async def add_service(order_id, service_id):
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" INSERT INTO order_service (
-                            order_id,
-                            service_id
-                            )
-                            VALUES (
-                            %s, %s
-                            )
-                            """, (
-                order_id,
-                service_id
-
-            ))
+            cursor.execute(add_service_query, (order_id, service_id))
             return conn.commit()
 
 
 async def add_treatment(order_id, medication):
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" INSERT INTO order_treatment (
-                            order_id,
-                            medication
-                            )
-                            VALUES (
-                            %s, %s
-                            )
-                            """, (
-                order_id,
-                medication
-
-            ))
+            cursor.execute(add_treatment_query, (order_id, medication))
             return conn.commit()
 
 
@@ -291,28 +272,7 @@ def show_register() -> str:
     """Show register"""
     with ps.connect(DATABASE_URL, sslmode='require') as conn:
         with conn.cursor() as cursor:
-            cursor.execute(""" 
-            SELECT  
-            orders.date,
-            owners.last_name,
-            owners.first_name,
-            species.name,
-            breeds.name,
-            patient.date_of_birth,  
-            patient.nickname,
-            vet_service.service,
-            order_treatment.medication,
-            orders.cost
-            FROM orders 
-            JOIN owners ON owners.id = orders.owner_id
-            JOIN patient ON patient.id = orders.patient_id
-            JOIN species ON species.id = patient.species_id
-            JOIN breeds ON breeds.id = patient.breed_id
-            LEFT JOIN order_service ON orders.id = order_service.order_id
-            JOIN vet_service ON vet_service.id = order_service.service_id
-            LEFT JOIN order_treatment ON orders.id = order_treatment.order_id  
-            ORDER BY orders.date DESC     
-            """)
+            cursor.execute(show_register_query)
             result = cursor.fetchall()
             rows = ''
 
@@ -320,3 +280,29 @@ def show_register() -> str:
                 rows += f'| {item[0]} | {item[1]} | {item[2]} | {item[3]} | ' \
                             f'{item[4]} | {item[5]} | {item[6]} | {item[7]} | {item[8]} | {item[9]} |' + '\n'
             return rows
+
+
+def fill_streets():
+    add_city('Иваново')
+    city_id = get_city_id('Иваново')
+    with open('utils/streetsivanovo.txt', encoding='utf16') as f:
+        for street in f:
+            add_street(city_id, street.strip())
+
+
+def fill_breeds():
+    species = ['собаки', 'кошки']
+    for item in species:
+        add_species(item)
+    dog_id = get_species_id(species[0])
+    cat_id = get_species_id(species[1])
+    with open('utils/dogbreeds.txt', encoding='utf16') as f:
+        for dog in f:
+            add_breed(dog_id, dog.strip())
+    with open('utils/catbreeds.txt', encoding='utf16') as f:
+        for cat in f:
+            add_breed(cat_id, cat.strip())
+
+
+
+
