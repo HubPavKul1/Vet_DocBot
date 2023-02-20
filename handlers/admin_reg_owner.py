@@ -8,6 +8,16 @@ from states.register import FSMRegOwner
 from utils.db import *
 
 
+async def show_owners_for_reg(message: types.Message):
+    owners = show_owners()
+    if owners:
+        with open(r'files/owners.txt', 'w', encoding='utf8') as file:
+            file.write(owners)
+        await bot.send_document(message.from_user.id, open(r'files/owners.txt', 'rb'))
+    else:
+        await message.reply('Владельцы не найдены', reply_markup=cancel_kb)
+
+
 # Регистрация владельца
 # @dp.message_handler(Command('Регистрация_владельца'), state=None)
 async def start_reg_owner(message: types.Message):
@@ -64,6 +74,7 @@ async def show_users_inline(user: types.CallbackQuery, state: FSMContext):
 
 
 def register_handlers_admin_reg_owner(dp: Dispatcher):
+    dp.register_message_handler(show_owners_for_reg, Command('Владельцы_животных'))
     dp.register_message_handler(start_reg_owner, Command('Регистрация_владельца'), state=None)
     dp.register_message_handler(reg_first_name, state=FSMRegOwner.first_name)
     dp.register_message_handler(reg_last_name, state=FSMRegOwner.last_name)

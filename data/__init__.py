@@ -1,1 +1,1 @@
-from data import config
+from data import config, ascii_filter, custom_handlers

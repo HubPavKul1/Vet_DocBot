@@ -108,6 +108,15 @@ def get_breed_id(species_id: int, breed: str) -> int:
             return result
 
 
+def get_breed(species_id: int, breed_id: int) -> str:
+    """Get breed id from db"""
+    with ps.connect(DATABASE_URL, sslmode='require') as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(get_breed_query, (species_id, breed_id))
+            result = cursor.fetchone()[0]
+            return result
+
+
 def get_service_id(service: str) -> int:
     """Get service id from db"""
     service = '%{}%'.format(service)
@@ -216,8 +225,9 @@ def show_owners() -> str:
             cursor.execute(show_owners_query)
             result = cursor.fetchall()
             owners = ''
-            for item in result:
-                owners += f'{item[1]} {item[2]}: {item[0]}' + '\n'
+            if result:
+                for item in result:
+                    owners += f'{item[1]} {item[2]}: {item[0]}' + '\n'
             return owners
 
 
@@ -285,7 +295,7 @@ def show_register() -> str:
 def fill_streets():
     add_city('Иваново')
     city_id = get_city_id('Иваново')
-    with open('utils/streetsivanovo.txt', encoding='utf16') as f:
+    with open(r'utils/streetsivanovo.txt', encoding='utf16') as f:
         for street in f:
             add_street(city_id, street.strip())
 
@@ -296,10 +306,10 @@ def fill_breeds():
         add_species(item)
     dog_id = get_species_id(species[0])
     cat_id = get_species_id(species[1])
-    with open('utils/dogbreeds.txt', encoding='utf16') as f:
+    with open(r'utils/dogbreeds.txt', encoding='utf16') as f:
         for dog in f:
             add_breed(dog_id, dog.strip())
-    with open('utils/catbreeds.txt', encoding='utf16') as f:
+    with open(r'utils/catbreeds.txt', encoding='utf16') as f:
         for cat in f:
             add_breed(cat_id, cat.strip())
 

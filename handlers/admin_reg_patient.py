@@ -1,18 +1,27 @@
+import logging
+import logging.config
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
 from create_bot import bot, dp
+from data.config import dict_config
+from keyboards.default import menu_kb as nav
 
 from keyboards.inline.client_kb import *
 from states.register import FSMRegAnimal
 from utils.db import *
 
 
+logging.config.dictConfig(dict_config)
+logger = logging.getLogger(__name__)
+
+
 # Регистрация животного
 # @dp.message_handler(Command('Регистрация_животного'), state=None)
 async def start_reg_animal(message: types.Message):
     await FSMRegAnimal.species_id.set()
+    logger.info("Start patient register")
     await message.reply('Выберите вид животного', reply_markup=animal_kb)
 
 
@@ -22,6 +31,7 @@ async def dog_inline(dog: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['species_id'] = '1'
     await FSMRegAnimal.next()
+    logger.info('Set dog species_id')
     await dog.message.answer('Введите ID породы животного', reply_markup=breed_kb)
     await dog.answer()
 
@@ -32,6 +42,7 @@ async def cat_inline(cat: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
         data['species_id'] = '2'
     await FSMRegAnimal.next()
+    logger.info('Set cat species_id')
     await cat.message.answer('Введите ID породы животного', reply_markup=breed_kb)
     await cat.answer()
 
@@ -55,7 +66,7 @@ async def cancel_handler(cancel: types.CallbackQuery, state: FSMContext):
     if current_state is None:
         return
     await state.finish()
-    await cancel.message.answer('OK')
+    await cancel.message.answer('OK', reply_markup=nav.adminMenu)
     await cancel.answer()
 
 
@@ -63,9 +74,10 @@ async def cancel_handler(cancel: types.CallbackQuery, state: FSMContext):
 # @dp.message_handler(state=FSMRegAnimal.breed_id)
 async def reg_breed(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
+        species_id = data.get('species_id')
         data['breed_id'] = message.text
-    await FSMRegAnimal.next()
-    await message.reply('Выберите пол животного', reply_markup=sex_kb)
+        await FSMRegAnimal.next()
+        await message.reply('Выберите пол животного', reply_markup=sex_kb)
 
 
 # Male Inline
@@ -139,17 +151,20 @@ async def reg_owner(message: types.Message, state: FSMContext):
 # @dp.callback_query_handler(state='*', text='add_patient')
 async def add_patient_inline(patient: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        await add_patient(
-            species_id=int(data.get('species_id')),
-            breed_id=int(data.get('breed_id')),
-            sex=data.get('sex'),
-            date_of_birth=data.get('date_of_birth'),
-            nickname=data.get('nickname'),
-            owner_id=int(data.get('owner_id'))
-        )
-    await patient.answer(f"Пациент {data.get('nickname')}\n успешно добавлен(a) в таблицу patient", show_alert=True)
-
-    await state.finish()
+        try:
+            await add_patient(
+                species_id=int(data.get('species_id')),
+                breed_id=int(data.get('breed_id')),
+                sex=data.get('sex'),
+                date_of_birth=data.get('date_of_birth'),
+                nickname=data.get('nickname'),
+                owner_id=int(data.get('owner_id'))
+            )
+            await patient.answer(f"Пациент {data.get('nickname')}\n успешно добавлен(a) в таблицу patient",
+                                 show_alert=True)
+            await state.finish()
+        except:
+            logger.exception()
 
 
 def register_handlers_admin_reg_patient(dp: Dispatcher):

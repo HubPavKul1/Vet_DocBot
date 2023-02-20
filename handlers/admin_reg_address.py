@@ -1,3 +1,4 @@
+import logging
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Command
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -8,6 +9,7 @@ from keyboards.inline.client_kb import *
 from states.register import FSMRegAddress
 from utils.db import *
 
+logger = logging.getLogger(__name__)
 
 # Регистрация адреса
 # @dp.message_handler(Command('Адрес_владельца'), state=None)
@@ -82,15 +84,17 @@ async def reg_flat(message: types.Message, state: FSMContext):
 # @dp.callback_query_handler(state='*', text='add_address')
 async def add_address_inline(address: types.CallbackQuery, state: FSMContext):
     async with state.proxy() as data:
-        await add_address(
-            owner_id=int(data.get('owner_id')),
-            street_id=int(data.get('street_id')),
-            house=data.get('house'),
-            flat=data.get('flat')
-        )
-    await address.answer(f"Адрес успешно добавлен в таблицу address", show_alert=True)
-
-    await state.finish()
+        try:
+            await add_address(
+                owner_id=int(data.get('owner_id')),
+                street_id=int(data.get('street_id')),
+                house=data.get('house'),
+                flat=data.get('flat')
+            )
+            await address.answer(f"Адрес успешно добавлен в таблицу address", show_alert=True)
+            await state.finish()
+        except:
+            logger.exception()
 
 
 def register_handlers_admin_reg_address(dp: Dispatcher):

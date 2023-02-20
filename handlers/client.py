@@ -31,7 +31,7 @@ async def start_working(message: types.Message):
                                reply_markup=nav.adminMenu)
 
     if not db.user_exists(user_id=user_id):
-        db.add_user(user_id=user_id,
+        await db.add_user(user_id=user_id,
                     first_name=message.from_user.first_name,
                     last_name=message.from_user.last_name
                     )
@@ -76,7 +76,7 @@ async def menu_commands(message: types.Message):
     if message.text == 'Инфо для владельцев животных':
         await bot.send_message(message.from_user.id, 'Выберите нужный раздел', reply_markup=nav.infoMenu)
         if not db.user_exists(user_id=message.from_user.id):
-            db.add_user(user_id=message.from_user.id,
+            await db.add_user(user_id=message.from_user.id,
                         first_name=message.from_user.first_name,
                         last_name=message.from_user.last_name
                         )
@@ -149,24 +149,24 @@ async def menu_commands(message: types.Message):
         await bot.send_message(message.from_user.id, 'Выберите услугу', reply_markup=nav.vetServices)
     elif message.text == 'Вакцинация':
         await bot.send_message(message.from_user.id, 'Выезд и вакцинация животного: \n'
-                                                     'отечественной вакциной - 1500 руб.,\n'
-                                                     'импортной вакциной - 2000 руб.',
+                                                     'отечественной вакциной - 2000 руб.,\n'
+                                                     'импортной вакциной - 2500 руб.',
                                reply_markup=inl_kb.contacts_kb
                                )
     elif message.text == 'Операции':
         await bot.send_message(message.from_user.id, 'Кастрация кота - 2000 руб.,\n'
-                                                     'Стерилизация кошки - 4000 руб.,\n'
+                                                     'Стерилизация кошки - 3000 руб.,\n'
                                                      'Простые хирургические операции '
                                                      '(хирургическая обработка ран, '
                                                      'вскрытие абцессов и т.п) - 2000 руб.,\n'
-                                                     'Сложные хирургические операции - 4000',
+                                                     'Сложные хирургические операции - 3000',
                                reply_markup=inl_kb.contacts_kb
                                )
     elif message.text == 'Лечение':
         await bot.send_message(message.from_user.id, 'Выезд и лечение животного: \n'
-                                                     'с легкой патологией - 1500 руб.,\n'
-                                                     'c патологией средней тяжести - 2000 руб.,\n'
-                                                     'при тяжелой патологии - 2500 руб.',
+                                                     'с легкой патологией - 2000 руб.,\n'
+                                                     'c патологией средней тяжести - 2500 руб.,\n'
+                                                     'при тяжелой патологии - 3000 руб.',
                                reply_markup=inl_kb.contacts_kb
                                )
 
@@ -186,7 +186,6 @@ async def menu_commands(message: types.Message):
         await bot.send_message(message.from_user.id, 'Администратор', reply_markup=nav.vetHelp)
     elif message.text == 'Регистрация':
         await bot.send_message(message.from_user.id, 'Регистрация', reply_markup=nav.vetReg)
-
     else:
         await bot.send_message(message.from_user.id, 'Не понял команду {}, выберите услугу или нажмите /start'
                                .format(message.from_user.first_name))

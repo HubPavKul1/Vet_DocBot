@@ -6,7 +6,7 @@ tables = ['users', 'address', 'patients', 'order_treatment',
 create_tables_query = """
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER,
+    user_id BIGINT,
     first_name VARCHAR(50),
     last_name VARCHAR(50)
 );
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS orders (
     order_date VARCHAR(20),
     owner_id INTEGER REFERENCES owners(id) ON DELETE CASCADE,
     patient_id INTEGER,
-    cost INTEGER REFERENCES patients(id) ON DELETE CASCADE
+    cost INTEGER 
 );
 
 CREATE TABLE IF NOT EXISTS vet_service (
@@ -95,7 +95,7 @@ get_street_id_query = """SELECT id FROM streets WHERE name LIKE %s;"""
 get_city_id_query = """SELECT id FROM cities WHERE name LIKE %s;"""
 add_city_query = """INSERT INTO cities (name) VALUES (%s);"""
 add_street_query = """INSERT INTO streets (city_id, name) VALUES (%s, %s);"""
-show_streets_query = """SELECT * FROM streets;"""
+show_streets_query = """SELECT id, name FROM streets;"""
 add_address_query = """INSERT INTO address (owner_id, street_id, house, flat) VALUES (%s, %s, %s, %s);"""
 
 add_owner_query = """INSERT INTO owners (first_name, last_name) VALUES (%s, %s);"""
@@ -134,7 +134,8 @@ add_species_query = """INSERT INTO species (name) VALUES (%s);"""
 get_species_id_query = """SELECT id FROM species WHERE name LIKE %s;"""
 add_breed_query = """INSERT INTO breeds (species_id, name) VALUES (%s, %s);"""
 get_breed_id_query = """SELECT id FROM breeds WHERE species_id = %s AND name LIKE %s;"""
-show_breeds_query = """SELECT * FROM breeds WHERE species_id = %s;"""
+get_breed_query = """SELECT name FROM breeds WHERE species_id = %s AND id = %s;"""
+show_breeds_query = """SELECT id, name FROM breeds WHERE species_id = %s;"""
 add_patient_query = """ INSERT INTO patients (species_id, breed_id, sex, date_of_birth, nickname, owner_id) 
 VALUES (%s, %s, %s, %s, %s, %s);
 """

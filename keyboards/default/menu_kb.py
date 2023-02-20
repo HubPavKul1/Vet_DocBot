@@ -20,13 +20,14 @@ vetHelp = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrags, btnCure).add(b
 
 # --- Register menu for admin ---
 btnOwner = KeyboardButton('/Регистрация_владельца')
+btnShowOwners = KeyboardButton('/Владельцы_животных')
 btnAddress = KeyboardButton('/Адрес_владельца')
 btnPatient = KeyboardButton('/Регистрация_животного')
 btnOrder = KeyboardButton('/Регистрация_заказа')
 btnToOrder = KeyboardButton('/Добавить_услугу')
 btnWorkRegister = KeyboardButton('/Журнал_регистрации')
 
-vetReg = ReplyKeyboardMarkup(resize_keyboard=True).add(btnOwner).add(btnPatient).add(btnAddress).\
+vetReg = ReplyKeyboardMarkup(resize_keyboard=True).add(btnOwner).add(btnShowOwners).add(btnPatient).add(btnAddress).\
     add(btnOrder).add(btnToOrder).add(btnWorkRegister).add(btnMain)
 
 
