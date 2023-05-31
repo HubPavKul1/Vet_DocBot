@@ -8,6 +8,7 @@ class FSMAdmin(StatesGroup):
     service = State()
     description = State()
     price = State()
+    drugs = State()
 
 
 

@@ -13,6 +13,7 @@ import psycopg2 as ps
 from handlers import *
 from utils.db import create_tables, delete_tables, fill_streets, fill_breeds
 from data.config import ADMINS, URL_APP, dict_config
+from vet_parser.site_parser import *
 
 # app = Flask(__name__)
 

@@ -12,11 +12,17 @@ adminMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(btnAdmin).add(btnInfo)
 
 
 # --- Next menu for admin ---
-btnDrags = KeyboardButton('Справочник препаратов')
+btnDrugs = KeyboardButton('Справочник препаратов')
 btnCure = KeyboardButton('Схемы лечения')
 btnRegister = KeyboardButton('Регистрация')
 
-vetHelp = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrags, btnCure).add(btnRegister).add(btnMain)
+vetHelp = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrugs, btnCure).add(btnRegister).add(btnMain)
+
+# --- Drugs for admin ---
+btnShowDrugs = KeyboardButton('Список препаратов')
+btnSearchDrug = KeyboardButton('Поиск препарата')
+
+vetDrugs = ReplyKeyboardMarkup(resize_keyboard=True).add(btnShowDrugs, btnSearchDrug).add(btnMain)
 
 # --- Register menu for admin ---
 btnOwner = KeyboardButton('/Регистрация_владельца')

@@ -6,6 +6,7 @@ from keyboards.default import menu_kb as nav
 from keyboards.inline import client_kb as inl_kb
 from data import config
 from utils import db
+from vet_parser import site_parser as parser
 
 admins = config.ADMINS
 contact_phone = config.PHONE
@@ -186,9 +187,18 @@ async def menu_commands(message: types.Message):
         await bot.send_message(message.from_user.id, 'Администратор', reply_markup=nav.vetHelp)
     elif message.text == 'Регистрация':
         await bot.send_message(message.from_user.id, 'Регистрация', reply_markup=nav.vetReg)
+    elif message.text == 'Справочник препаратов':
+        await bot.send_message(message.from_user.id, 'Справочник препаратов', reply_markup=nav.vetDrugs)
+    elif message.text == 'Список препаратов':
+        await bot.send_document(message.chat.id, open(r'vet_parser/drugs.json', 'rb'))
     else:
         await bot.send_message(message.from_user.id, 'Не понял команду {}, выберите услугу или нажмите /start'
                                .format(message.from_user.first_name))
+
+
+async def search_drug(message):
+    response = parser.search_drug_by_name(message)
+    bot.send_message(message.from_user.id, response)
 
 
 def register_handlers_client(dp: Dispatcher):
