@@ -11,6 +11,7 @@ from utils.db import *
 
 logger = logging.getLogger(__name__)
 
+
 # Регистрация адреса
 # @dp.message_handler(Command('Адрес_владельца'), state=None)
 async def start_reg_address(message: types.Message):

@@ -48,6 +48,7 @@ admin_reg_owner.register_handlers_admin_reg_owner(dp)
 admin_reg_address.register_handlers_admin_reg_address(dp)
 admin_reg_patient.register_handlers_admin_reg_patient(dp)
 admin_reg_order.register_handlers_admin_reg_order(dp)
+search_drugs.register_handlers_search_drug(dp)
 client.register_handlers_client(dp)
 other.register_handlers_other(dp)
 

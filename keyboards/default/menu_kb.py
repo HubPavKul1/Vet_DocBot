@@ -20,7 +20,7 @@ vetHelp = ReplyKeyboardMarkup(resize_keyboard=True).add(btnDrugs, btnCure).add(b
 
 # --- Drugs for admin ---
 btnShowDrugs = KeyboardButton('Список препаратов')
-btnSearchDrug = KeyboardButton('Поиск препарата')
+btnSearchDrug = KeyboardButton('/Поиск_препарата')
 
 vetDrugs = ReplyKeyboardMarkup(resize_keyboard=True).add(btnShowDrugs, btnSearchDrug).add(btnMain)
 

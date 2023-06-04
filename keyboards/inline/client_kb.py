@@ -65,3 +65,8 @@ price_kb = InlineKeyboardMarkup(row_width=2).add(price_btn, cancel_btn)
 add_service_btn = InlineKeyboardButton(text='добавить услугу в заказ', callback_data='add_service')
 add_treatment_btn = InlineKeyboardButton(text='добавить лечение в заказ', callback_data='add_treatment')
 add_to_order_kb = InlineKeyboardMarkup(row_width=2).add(add_service_btn, add_treatment_btn, cancel_btn)
+
+# --- Search drug by name Inline ---
+search_drug_btn = InlineKeyboardButton(text='найти препарат', callback_data='search_drug')
+search_drug_kb = InlineKeyboardMarkup().add(search_drug_btn, cancel_btn)
+

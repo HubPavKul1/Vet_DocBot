@@ -3,4 +3,5 @@ from handlers import admin_reg_owner
 from handlers import admin_reg_address
 from handlers import admin_reg_patient
 from handlers import admin_reg_order
+from handlers import search_drugs
 from handlers import other

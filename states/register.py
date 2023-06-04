@@ -35,4 +35,8 @@ class FSMAddService(StatesGroup):
     medication = State()
 
 
+class FSMSearchDrug(StatesGroup):
+    drug_name = State()
+
+
 

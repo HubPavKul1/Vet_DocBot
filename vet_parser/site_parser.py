@@ -1,4 +1,5 @@
 import json
+import os
 import random
 import time
 
@@ -14,16 +15,16 @@ categories_url = "/vetmedicaments.html"
 session = Session()
 
 
-# def get_html(url):
-#     session.get(base_url, headers=headers)
-#     if base_url not in url:
-#         url = base_url + url
-#     response = session.get(url, headers=headers)
-#     url_split = url.split("/")
-#     file_name = f'data\\{url_split[-2] + url_split[-1]}'
-#     with open(file_name, "w", encoding="utf-8") as file:
-#         file.write(response.text)
-#     return file_name
+def get_html(url):
+    session.get(base_url, headers=headers)
+    if base_url not in url:
+        url = base_url + url
+    response = session.get(url, headers=headers)
+    url_split = url.split("/")
+    file_name = f'data\\{url_split[-2] + url_split[-1]}'
+    with open(file_name, "w", encoding="utf-8") as file:
+        file.write(response.text)
+    return file_name
 
 
 def get_data(url):
@@ -47,41 +48,41 @@ def get_data(url):
 #             json.dump(subcategory_dict, file, indent=4, ensure_ascii=False)
 
 
-# def parse_json(file_name):
-#     with open(file_name, encoding='utf-8') as f:
-#         data_dict = json.load(f)
-#         drugs_dict = {}
-#         for name, url in data_dict.items():
-#             file_name = get_html(url)
-#             with open(file_name, encoding='utf-8') as file:
-#                 resp = file.read()
-#                 soup = BeautifulSoup(resp, "lxml")
-#                 drugs_list = soup.find_all('h3', class_="item-title")
-#                 pagination = soup.find('div', class_="pagination")
-#                 if not pagination:
-#                     for elem in drugs_list:
-#                         drug_name = elem.find("a").get("title")
-#                         drug_url = base_url + elem.find("a").get("href")
-#                         drugs_dict[drug_name] = drug_url
-#                 else:
-#                     tags = pagination.find_all('a')
-#                     last_page_url = [base_url + tag.get('href') for tag in tags][-1]
-#                     last_page_num = int(last_page_url.split('.')[-2][-1])
-#                     url_for_parse = base_url + categories_url.split('.html')[0] + '/' + last_page_url.split('/')[
-#                         -2] + '/'
-#                     for i in range(2, last_page_num + 1):
-#                         file_name = get_html(url_for_parse + f'{i}.html')
-#                         with open(file_name, encoding='utf-8') as src_file:
-#                             resp = src_file.read()
-#                             soup = BeautifulSoup(resp, 'lxml')
-#                             drugs_list = soup.find_all('h3', class_="item-title")
-#                             for elem in drugs_list:
-#                                 drug_name = elem.find("a").get("title")
-#                                 drug_url = base_url + elem.find("a").get("href")
-#                                 drugs_dict[drug_name] = drug_url
-#             time.sleep(random.randint(3, 5))
-#         with open("drugs.json", "a", encoding='utf-8') as json_file:
-#             json.dump(drugs_dict, json_file, indent=4, ensure_ascii=False)
+def parse_json(file_name):
+    with open(file_name, encoding='utf-8') as f:
+        data_dict = json.load(f)
+        drugs_dict = {}
+        for name, url in data_dict.items():
+            file_name = get_html(url)
+            with open(file_name, encoding='utf-8') as file:
+                resp = file.read()
+                soup = BeautifulSoup(resp, "lxml")
+                drugs_list = soup.find_all('h3', class_="item-title")
+                pagination = soup.find('div', class_="pagination")
+                if not pagination:
+                    for elem in drugs_list:
+                        drug_name = elem.find("a").get("title")
+                        drug_url = base_url + elem.find("a").get("href")
+                        drugs_dict[drug_name] = drug_url
+                else:
+                    tags = pagination.find_all('a')
+                    last_page_url = [base_url + tag.get('href') for tag in tags][-1]
+                    last_page_num = int(last_page_url.split('.')[-2][-1])
+                    url_for_parse = base_url + categories_url.split('.html')[0] + '/' + last_page_url.split('/')[
+                        -2] + '/'
+                    for i in range(1, last_page_num + 1):
+                        file_name = get_html(url_for_parse + f'{i}.html')
+                        with open(file_name, encoding='utf-8') as src_file:
+                            resp = src_file.read()
+                            soup = BeautifulSoup(resp, 'lxml')
+                            drugs_list = soup.find_all('h3', class_="item-title")
+                            for elem in drugs_list:
+                                drug_name = elem.find("a").get("title")
+                                drug_url = base_url + elem.find("a").get("href")
+                                drugs_dict[drug_name] = drug_url
+            time.sleep(random.randint(3, 5))
+        with open("drugs.json", "a", encoding='utf-8') as json_file:
+            json.dump(drugs_dict, json_file, indent=4, ensure_ascii=False)
 
 
 # def get_drugs_from_json(file_name):
@@ -94,7 +95,7 @@ def get_data(url):
             #     soup = BeautifulSoup(resp, "lxml")
 
 
-def get_drug_property(url):
+def get_drug_property(url: str) -> dict:
     drug_prop = get_data(url)
     soup = BeautifulSoup(drug_prop, "lxml")
     drug_title = soup.find(class_="item-title").text
@@ -105,11 +106,16 @@ def get_drug_property(url):
     drug_description = ''
     for text in drug_description_list:
         new_text = ''
+        counter = 0
         for elem in text:
-            if elem.isupper() and elem not in 'IVUSA':
+            if elem.isupper() and counter < 1 and elem not in 'IVUSA':
                 new_text += '\n' + elem
+                counter += 1
             else:
                 new_text += elem
+            if elem.islower() or elem in '.,""':
+                counter = 0
+
         drug_description += new_text
     drug_prop_dict = {
         'title': drug_title,
@@ -119,21 +125,25 @@ def get_drug_property(url):
     return drug_prop_dict
 
 
-def search_drug_by_name(drug_name: str):
-    with open("drugs.json", encoding='utf-8') as json_file:
+def search_drug_by_name(drug_name: str) -> list:
+    # file_name = os.path.abspath('drugs.json')
+    file_name = os.path.abspath('vet_parser/drugs.json')
+    with open(file_name, encoding='utf-8') as json_file:
         drugs = json.load(json_file)
         drug_url = {}
         for name, url in drugs.items():
             if drug_name.lower() in name.lower():
                 drug_url[name] = url
-        result = {}
+        result = []
         if not drug_url:
-            result['message'] = 'Препарат не найден'
-        elif len(drug_url) == 1:
-            result = drug_url
-        if len(drug_url) > 1:
+            result.append('Препарат не найден')
+        else:
             for name, url in drug_url.items():
-                result[name] = get_drug_property(url)
-        drug_json = json.dumps(result, indent=4, ensure_ascii=False)
-        return drug_json
+                result.append(get_drug_property(url))
+        return result
 
+
+if __name__ == '__main__':
+    parse_json('drugs_subcategories.json')
+#     print(search_drug_by_name('синулокс'))
+    # print(type(search_drug_by_name('gyh')))

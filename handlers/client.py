@@ -1,12 +1,10 @@
 from aiogram import types, Dispatcher
-from datetime import datetime
 
 from create_bot import bot, dp
 from keyboards.default import menu_kb as nav
 from keyboards.inline import client_kb as inl_kb
 from data import config
 from utils import db
-from vet_parser import site_parser as parser
 
 admins = config.ADMINS
 contact_phone = config.PHONE
@@ -33,9 +31,9 @@ async def start_working(message: types.Message):
 
     if not db.user_exists(user_id=user_id):
         await db.add_user(user_id=user_id,
-                    first_name=message.from_user.first_name,
-                    last_name=message.from_user.last_name
-                    )
+                          first_name=message.from_user.first_name,
+                          last_name=message.from_user.last_name
+                          )
         await bot.send_message(config.ADMINS[0], "{0.first_name} {0.last_name} добавлен в таблицу users!".
                                format(message.from_user))
     else:
@@ -78,9 +76,9 @@ async def menu_commands(message: types.Message):
         await bot.send_message(message.from_user.id, 'Выберите нужный раздел', reply_markup=nav.infoMenu)
         if not db.user_exists(user_id=message.from_user.id):
             await db.add_user(user_id=message.from_user.id,
-                        first_name=message.from_user.first_name,
-                        last_name=message.from_user.last_name
-                        )
+                              first_name=message.from_user.first_name,
+                              last_name=message.from_user.last_name
+                              )
             await bot.send_message(config.ADMINS[0], "{0.first_name} {0.last_name} добавлен в таблицу users!".
                                    format(message.from_user))
         else:
@@ -194,11 +192,6 @@ async def menu_commands(message: types.Message):
     else:
         await bot.send_message(message.from_user.id, 'Не понял команду {}, выберите услугу или нажмите /start'
                                .format(message.from_user.first_name))
-
-
-async def search_drug(message):
-    response = parser.search_drug_by_name(message)
-    bot.send_message(message.from_user.id, response)
 
 
 def register_handlers_client(dp: Dispatcher):
